@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from .forms import BirthdayForm
 from .models import Birthday
@@ -6,8 +6,23 @@ from .models import Birthday
 from .utils import calculate_birthday_countdown
 
 
-def birthday(request):
-    form = BirthdayForm(request.POST or None)
+# Добавим опциональный параметр pk.
+def birthday(request, pk=None):
+    # Если в запросе указан pk (если получен запрос на редактирование объекта):
+    if pk is not None:
+        # Находим запрошенный объект для редактирования по первичному ключу
+        # или возвращаем 404 ошибку, если такого объекта нет.
+        # Получаем объект модели или выбрасываем 404 ошибку.
+        instance = get_object_or_404(Birthday, pk=pk)
+    # Если в запросе не указан pk
+    # (если получен запрос к странице создания записи):
+    else:
+        # Связывать форму с объектом не нужно, установим значение None.
+        instance = None
+    # Связываем форму с найденным объектом: передаём его в аргумент instance.
+    # Передаём в форму либо данные из запроса, либо None. 
+    # В случае редактирования прикрепляем объект модели.
+    form = BirthdayForm(request.POST or None, instance=instance)
     # Создаём словарь контекста сразу после инициализации формы.
     context = {'form': form}
     # Если форма валидна...
@@ -22,6 +37,7 @@ def birthday(request):
         # Обновляем словарь контекста: добавляем в него новый элемент.
         context.update({'birthday_countdown': birthday_countdown})
     return render(request, 'birthday/birthday.html', context=context)
+
 
 def birthday_list(request):
     # Получаем все объекты модели Birthday из БД.
