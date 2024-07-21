@@ -12,5 +12,6 @@ urlpatterns = [
     # path('<pk>/edit', views.birthday, name='edit'),
     path('<int:pk>/edit/', views.BirthdayUpdateView.as_view(), name='edit'),
     # path('<pk>/delete', views.birthday_delete, name='delete'),
-    path('<int:pk>/delete/', views.BirthdayDeleteView.as_view(), name='delete')
+    path('<int:pk>/delete/', views.BirthdayDeleteView.as_view(), name='delete'),
+    path('<int:pk>/', views.BirthdayDetailView.as_view(), name='detail'),
 ]
