@@ -1,11 +1,38 @@
 from django.shortcuts import get_object_or_404, redirect, render
 # Импортируем класс пагинатора.
 from django.core.paginator import Paginator
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.urls import reverse_lazy
 
 from .forms import BirthdayForm
 from .models import Birthday
 # Импортируем из utils.py функцию для подсчёта дней.
 from .utils import calculate_birthday_countdown
+
+
+class BirthdayMixin:
+    # Указываем модель, с которой работает CBV...
+    model = Birthday
+    # Указываем имя формы:
+    form_class = BirthdayForm
+    # Явным образом указываем шаблон:
+    template_name = 'birthday/birthday.html'
+    # Указываем namespace:name страницы, куда будет перенаправлен пользователь
+    # после создания объекта:
+    success_url = reverse_lazy('birthday:lazy')
+
+
+class BirthdayCreateView(BirthdayMixin, CreateView):
+    pass
+
+
+class BirthdayUpdateView(BirthdayMixin, UpdateView):
+    pass
+
+
+class BirthdayDeleteView(DeleteView):
+    model = Birthday
+    success_url = reverse_lazy('birthday:list')
 
 
 # Добавим опциональный параметр pk.
@@ -45,7 +72,18 @@ def birthday(request, pk=None):
     return render(request, 'birthday/birthday.html', context=context)
 
 
-def birthday_list(request):
+# Наследуем класс от встроенного ListView:
+class BirthdayListView(ListView):
+    # Указываем модель, с которой работает CBV...
+    model = Birthday
+    # ...сортировку, которая будет применена при выводе списка объектов:
+    ordering = 'id'
+    # ...и даже настройки пагинации:
+    paginate_by = 5
+
+
+# Это предыдыущая функция, до темы Class_based views
+def birthday_list_1(request):
     # Получаем все объекты модели Birthday из БД.
     birthdays = Birthday.objects.order_by('id')
     # Создаём объект пагинатора с количеством 10 записей на страницу.
@@ -63,7 +101,7 @@ def birthday_list(request):
     return render(request, 'birthday/birthday_list.html', context)
 
 
-def birthday_delete(request, pk):
+def birthday_delete_1(request, pk):
     # Получаем объект модели или выбрасываем 404 ошибку.
     instance = get_object_or_404(Birthday, pk=pk)
     # В форму передаём только объект модели;
