@@ -96,3 +96,14 @@ def birthday_delete_1(request, pk):
         return redirect('birthday:list')
     # Если был получен GET-запрос — отображаем форму.
     return render(request, 'birthday/birthday.html', context)
+
+
+
+class BirthdayMixin:
+    # Указываем модель, с которой работает CBV...
+    model = Birthday
+    # Явным образом указываем шаблон:
+    # template_name = 'birthday/birthday.html'
+    # Указываем namespace:name страницы, куда будет перенаправлен пользователь
+    # после создания объекта:
+    success_url = reverse_lazy('birthday:list')
