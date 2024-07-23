@@ -1,3 +1,6 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.http import HttpResponse
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
     )
@@ -8,17 +11,34 @@ from .models import Birthday
 from .utils import calculate_birthday_countdown
 
 
-class BirthdayCreateView(CreateView):
+class OnlyAuthorMixin(UserPassesTestMixin):
+
+    def test_func(self):
+        # Получаем текущий объект.
+        object = self.get_object()
+        # Метод вернёт True или False.
+        # Если пользователь - автор объекта, то тест будет пройден.
+        # Если нет, то будет вызвана ошибка 403.
+        return object.author == self.request.user
+
+
+class BirthdayCreateView(OnlyAuthorMixin, CreateView):
+    model = Birthday
+    form_class = BirthdayForm
+
+    def form_valid(self, form):
+        # Присвоить полю author объект пользователя из запроса.
+        form.instance.author = self.request.user
+        # Продолжить валидацию, описанную в форме.
+        return super().form_valid(form)
+
+
+class BirthdayUpdateView(OnlyAuthorMixin, UpdateView):
     model = Birthday
     form_class = BirthdayForm
 
 
-class BirthdayUpdateView(UpdateView):
-    model = Birthday
-    form_class = BirthdayForm
-
-
-class BirthdayDeleteView(DeleteView):
+class BirthdayDeleteView(OnlyAuthorMixin, DeleteView):
     model = Birthday
     success_url = reverse_lazy('birthday:list')
 
@@ -46,3 +66,9 @@ class BirthdayDetailView(DetailView):
         )
         # Возвращаем словарь контекста.
         return context
+    
+
+@login_required
+def simple_view(request):
+    return HttpResponse('Страница для залогиненных пользователей!')
+

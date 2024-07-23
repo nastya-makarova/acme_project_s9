@@ -7,6 +7,7 @@ app_name = 'birthday'
 urlpatterns = [
     # path('', views.birthday, name='create'),
     # path('list/', views.birthday_list, name='list'),
+    path('login_only/', views.simple_view),
     path('', views.BirthdayCreateView.as_view(), name='create'),
     path('list/', views.BirthdayListView.as_view(), name='list'),
     # path('<pk>/edit', views.birthday, name='edit'),
