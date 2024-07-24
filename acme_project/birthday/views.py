@@ -22,7 +22,7 @@ class OnlyAuthorMixin(UserPassesTestMixin):
         return object.author == self.request.user
 
 
-class BirthdayCreateView(OnlyAuthorMixin, CreateView):
+class BirthdayCreateView(CreateView):
     model = Birthday
     form_class = BirthdayForm
 
